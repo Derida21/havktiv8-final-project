@@ -1,0 +1,41 @@
+{
+  "positive": {
+    "0": "Material & comfort",
+    "1": "Fast delivery",
+    "2": "Good / works / authentic product",
+    "3": "Responsive, friendly seller",
+    "4": "Safe & neat packaging",
+    "5": "Thanks & general praise",
+    "6": "Affordable / good value",
+    "7": "Good / works / authentic product",
+    "8": "Safe & neat packaging",
+    "9": "Responsive, friendly seller",
+    "10": "Safe & neat packaging",
+    "11": "Thanks & general praise",
+    "12": "Repeat order / as ordered",
+    "13": "Thanks & general praise",
+    "14": "Good / works / authentic product",
+    "15": "Good / works / authentic product"
+  },
+  "negative": {
+    "0": "Item not as described",
+    "1": "Unresponsive seller",
+    "2": "Damaged packaging",
+    "3": "Item not as described",
+    "4": "Defective / does not work",
+    "5": "Bad smell or taste",
+    "6": "Poor quality / flimsy",
+    "7": "Damaged packaging",
+    "8": "Slow delivery",
+    "9": "General disappointment",
+    "10": "Broken / damaged item",
+    "11": "Poor quality / flimsy",
+    "12": "General disappointment",
+    "13": "Item not as described",
+    "14": "Defective / does not work",
+    "15": "Poor quality / flimsy",
+    "16": "Defective / does not work",
+    "17": "Poor quality / flimsy",
+    "18": "Item not as described"
+  }
+}
