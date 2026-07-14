@@ -1,6 +1,6 @@
 FROM python:3.13.5-slim
 
-WORKDIR /app
+WORKDIR /src
 
 RUN apt-get update && apt-get install -y \
     build-essential \
