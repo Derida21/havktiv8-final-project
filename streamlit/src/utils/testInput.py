@@ -5,14 +5,14 @@ from utils.db_connection import get_connection
 from utils.inference import predict_theme
 
 
-def _insert(product, rating, review, sentiment, theme):
+def _insert(product, rating, review, sentiment, theme, similarity):
     conn = get_connection()
     with conn.session as session:
         session.execute(
             text("INSERT INTO user_input (product, rating, review, sentiment, theme) "
                  "VALUES (:product, :rating, :review, :sentiment, :theme)"),
             {"product": product, "rating": rating, "review": review,
-             "sentiment": sentiment, "theme": theme},
+             "sentiment": sentiment, "theme": theme, "similarity":similarity},
         )
         session.commit()
 
