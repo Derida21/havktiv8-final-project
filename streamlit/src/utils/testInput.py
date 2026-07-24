@@ -9,8 +9,8 @@ def _insert(product, rating, review, sentiment, theme, similarity):
     conn = get_connection()
     with conn.session as session:
         session.execute(
-            text("INSERT INTO user_input (product, rating, review, sentiment, theme) "
-                 "VALUES (:product, :rating, :review, :sentiment, :theme)"),
+            text("INSERT INTO user_input (product, rating, review, sentiment, theme, similarity) "
+                 "VALUES (:product, :rating, :review, :sentiment, :theme,:similarity)"),
             {"product": product, "rating": rating, "review": review,
              "sentiment": sentiment, "theme": theme, "similarity":similarity},
         )
