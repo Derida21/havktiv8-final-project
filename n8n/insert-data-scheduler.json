@@ -1,0 +1,255 @@
+{
+  "name": "insert-data-scheduler",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        -96
+      ],
+      "id": "084d7623-7324-4006-b30f-4eb563491802",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1GYFvY-W9qmB2jmIwqomySa_gLoOxIjZ37PuXqgV9DQ8",
+          "mode": "list",
+          "cachedResultName": "user_input",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GYFvY-W9qmB2jmIwqomySa_gLoOxIjZ37PuXqgV9DQ8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GYFvY-W9qmB2jmIwqomySa_gLoOxIjZ37PuXqgV9DQ8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "processed",
+            "review": "={{ $('getDataRaw').first().json.review }}"
+          },
+          "matchingColumns": [
+            "review"
+          ],
+          "schema": [
+            {
+              "id": "product",
+              "displayName": "product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "rating",
+              "displayName": "rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "review",
+              "displayName": "review",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        464,
+        -96
+      ],
+      "id": "f9754acd-bb0e-49f9-bece-defc502d23e0",
+      "name": "updateStatusRaw",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "F6F89cPrBCNs7JJW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1GYFvY-W9qmB2jmIwqomySa_gLoOxIjZ37PuXqgV9DQ8",
+          "mode": "list",
+          "cachedResultName": "user_input",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GYFvY-W9qmB2jmIwqomySa_gLoOxIjZ37PuXqgV9DQ8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GYFvY-W9qmB2jmIwqomySa_gLoOxIjZ37PuXqgV9DQ8/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -208,
+        -96
+      ],
+      "id": "10715d1e-805f-44df-8a8e-b89f5becfe30",
+      "name": "getDataRaw",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "F6F89cPrBCNs7JJW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nfor (let i = 0; i < items.length; i++){\n    if( items[i].json.status === 'waiting'){\n      return items[i]\n    }    \n}\n\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        -96
+      ],
+      "id": "32f41c14-9e31-4eaf-9ed9-e130a17e6162",
+      "name": "getWaitingStatus"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO user_input (product, rating, review)\nVALUES (\n  '{{ $json.product }}',\n  {{ $json.rating }},\n  '{{ $json.review }}'\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        240,
+        -96
+      ],
+      "id": "c0077867-a5f3-48ea-b060-e4e6de523f0c",
+      "name": "insertToDataBase",
+      "credentials": {
+        "postgres": {
+          "id": "wWqW0vukURKiQjvo",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "getDataRaw",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getDataRaw": {
+      "main": [
+        [
+          {
+            "node": "getWaitingStatus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getWaitingStatus": {
+      "main": [
+        [
+          {
+            "node": "insertToDataBase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "insertToDataBase": {
+      "main": [
+        [
+          {
+            "node": "updateStatusRaw",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c17d76de-279b-41b9-afd2-a95d00e5d5c1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d018df81d39524fce88c2dad29279eb3c612b955af172e3ccdb7dd90da289d54"
+  },
+  "nodeGroups": [],
+  "id": "oVBY6B120UF86m3I",
+  "tags": []
+}

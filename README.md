@@ -84,8 +84,10 @@ havktiv8-final-project/
 │       └── .streamlit/
 │           └── secrets.toml      # (local only)
 ├── n8n/                          # exported n8n workflow definitions
-│   ├── auto_inference.json
-│   └── auto_insert_data.json
+│   ├── inference-scheduler.json
+│   ├── insert-data-scheduler.json
+│   ├── inference-scheduler.png
+│   └── insert-data-scheduler.png
 └── README.md
 ```
 
@@ -112,9 +114,10 @@ Buka terminal baru:
 ```bash
 cd streamlit
 mkdir .streamlit
+cd .streamlit
 notepad secret.toml
 
-cd ..
+cd ../..
 docker compose up -d
 ```
 
@@ -153,6 +156,7 @@ Buka di `http://localhost:8501` di browser.
 
 - **FastAPI**: di-deploy ke [Hugging Face Spaces](https://huggingface.co/spaces/scoorpion21/fastpi) menggunakan Docker
 - **Streamlit**: di-deploy ke [Streamlit Community Cloud](https://tokopedia-sentiment-review.streamlit.app/), dengan main file path `streamlit/src/app.py`
+- **n8n**: menggunakan service dari third-party
 
 Secrets untuk masing-masing platform diisi lewat dashboard platform tersebut:  
 - Hugging Face Spaces → Settings → Secrets  
