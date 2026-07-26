@@ -38,12 +38,12 @@ def run():
         try:
             _, ranked = predict_theme(review.strip())
             if ranked:
-                sentiment, theme = ranked[0][0], ranked[0][1]
+                sentiment, theme, similarity = ranked[0][0], ranked[0][1], ranked[0][2]
         except Exception:
             pass
 
         try:
-            _insert(product.strip(), rating, review.strip(), sentiment, theme)
+            _insert(product.strip(), rating, review.strip(), sentiment, theme, similarity)
             if theme:
                 st.success(f"Saved! Predicted theme: **{theme}**  ({sentiment.lower()} review)")
             else:
