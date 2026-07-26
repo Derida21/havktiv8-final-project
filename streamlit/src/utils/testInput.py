@@ -34,7 +34,8 @@ def run():
             return
 
         # Predict the theme on the way in (best-effort: still save the review if this fails).
-        sentiment, theme = None, None
+        sentiment, theme, similarity = None, None, None
+        
         try:
             _, ranked = predict_theme(review.strip())
             if ranked:
