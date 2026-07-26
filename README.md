@@ -1,8 +1,8 @@
 # Topic Pulse — Topic-Based Review Analysis for Indonesian Tokopedia Reviews
 
-Proyek ini memanfaatkan Python dan BERTopic untuk melampaui analisis sentimen dengan mengidentifikasi topik utama di balik pujian maupun keluhan pelanggan pada ulasan Tokopedia menggunakan dataset PRDECT-ID.
+This project uses Python and BERTopic to go beyond sentiment analysis, uncovering the actual topics behind customer praise and complaints in Indonesian Tokopedia reviews (PRDECT-ID dataset).
 
-Aplikasi ini memungkinkan pengguna untuk mempelajari metodologi pemodelan, menjelajahi dashboard Exploratory Data Analysis (EDA) yang interaktif, memprediksi tema dari sebuah ulasan secara real-time, serta mengirimkan ulasan baru yang secara otomatis diklasifikasikan ke dalam topik yang sesuai..
+The app lets users explore the model's methodology, browse an interactive EDA dashboard, predict the theme of any review in real time, and submit new reviews that are automatically themed on the way in.
 
 ![App Preview](topic-pulse-logo.png)
 
@@ -12,9 +12,9 @@ Aplikasi ini memungkinkan pengguna untuk mempelajari metodologi pemodelan, menje
 
 | Name | Role | Job Description |
 |---|---|---|
-| Fauzi Maulana | Data Analyst | Exploratory Data Analysis, dashboard insight, interpretasi tema & sentimen |
-| Derida Falahian | Data Engineer | Arsitektur deployment, integrasi FastAPI–Streamlit, database, CI/CD |
-| Dafa Hutapea | Data Scientist | Preprocessing teks, training model BERTopic, evaluasi model |
+| Fauzi Maulana | Data Analyst | Exploratory Data Analysis, dashboard insight |
+| Derida Falahian | Data Engineer | Arsitektur deployment, integrasi FastAPI–Streamlit, Database, CI/CD, Automation |
+| Dafa Hutapea | Data Scientist | Preprocessing teks, training model BERTopic, evaluasi model, interpretasi tema & sentimen |
 
 ---
 
@@ -27,12 +27,37 @@ Aplikasi ini memungkinkan pengguna untuk mempelajari metodologi pemodelan, menje
 
 ---
 
+## Architecture
+![](flow.png)  
+
+**Alur singkat:**
+1. **User-facing flow** — Streamlit (frontend) menerima input user (baca dashboard, submit review, minta prediksi tema), lalu memanggil FastAPI untuk inference dan Supabase untuk baca/tulis data.
+2. **Automation flow (n8n)** — dua workflow berjalan independen dari aplikasi utama:
+   - **Auto Inference Scheduler** — berjalan terjadwal (misal tiap X jam), mengambil review yang belum punya tema dari database, mengirimkannya ke FastAPI `/infer`, lalu menulis hasil tema kembali ke Supabase.
+   - **Auto Insert Data to DB** — mengambil data review baru dari sumber eksternal dan memasukkannya ke Supabase secara otomatis, tanpa perlu input manual lewat Streamlit.
+
+Kedua workflow ini memisahkan proses **batch/background** dari proses **real-time** yang dilayani FastAPI dan Streamlit — sehingga aplikasi utama tetap ringan dan tidak perlu menangani job terjadwal sendiri.
+
+---
+
+## Workflow Automation (n8n)
+
+| Workflow | Trigger | Fungsi |
+|---|---|---|
+| **Auto Inference** | Schedule (Cron) | Ambil review baru yang belum memiliki tema dari Supabase → kirim ke FastAPI `/infer` → simpan hasil prediksi tema kembali ke Supabase |
+| **Auto Insert Data to DB** | Schedule (Cron) | Ambil data review baru dari sumber eksternal → insert ke tabel Supabase agar tersedia untuk proses inference dan ditampilkan di dashboard |
+
+> File export workflow n8n (`.json`) disimpan di folder [`n8n/`](./n8n) agar dapat di-import ulang ke instance n8n mana pun.
+
+---
+
 ## Tech Stack
 
 - **Modeling**: Python, BERTopic (BERT-based topic modeling), Sentence Transformers
 - **Frontend**: Streamlit
 - **Backend**: FastAPI (inference service)
 - **Database**: PostgreSQL (Supabase)
+- **Automation**: n8n (scheduled inference & auto data ingestion workflows)
 - **Deployment**: Streamlit Community Cloud (frontend), Hugging Face Spaces (FastAPI inference API)
 
 ---
@@ -41,13 +66,14 @@ Aplikasi ini memungkinkan pengguna untuk mempelajari metodologi pemodelan, menje
 
 ```
 havktiv8-final-project/
-├── fastpi/                      # FastAPI inference
+├── fastpi/                       # FastAPI inference service
+│   ├── app.py
 │   ├── utils/
 │   ├── artifacts/
-│   ├── app.py
 │   ├── requirements.txt
 │   └── Dockerfile
-├── streamlit/                   # frontend
+├── modeling/                     # Streamlit frontend
+├── streamlit/                    # Streamlit frontend
 │   └── src/
 │       ├── app.py
 │       ├── eda.py
@@ -56,7 +82,10 @@ havktiv8-final-project/
 │       ├── utils/
 │       ├── requirements.txt
 │       └── .streamlit/
-│           └── secrets.toml     # (local only)
+│           └── secrets.toml      # (local only)
+├── n8n/                          # exported n8n workflow definitions
+│   ├── auto_inference.json
+│   └── auto_insert_data.json
 └── README.md
 ```
 
@@ -76,40 +105,24 @@ havktiv8-final-project/
 git clone https://github.com/Derida21/havktiv8-final-project.git
 cd havktiv8-final-project
 ```
+### 2. Setup Streamlit (frontend)
 
-### 2. Setup FastAPI (inference service)
-
-```bash
-cd fastpi
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate   # macOS/Linux
-
-pip install -r requirements.txt
-```
-
-Buat file `.env` di dalam folder `fastpi/` (jangan di-push ke Git):
-
-```
-INFERENCE_API_KEY=nilai-rahasia-kamu
-```
-
-Jalankan servernya:
+Buka terminal baru:
 
 ```bash
-uvicorn app:app --reload --port 8000
+cd streamlit
+mkdir .streamlit
+notepad secret.toml
+
+cd ..
+docker compose up -d
 ```
 
-Cek apakah service sudah hidup: buka `http://localhost:8000/health` di browser, harus mengembalikan `{"status": "ok"}`.
-
-### 3. Setup Streamlit (frontend)
-
-
-Buat folder `.streamlit/` di dalam `streamlit/src/`, lalu buat file `.streamlit/secrets.toml`:
+Buat folder `.streamlit/`, lalu buat file `.streamlit/secrets.toml`:
 
 ```toml
-API_URL = "http://localhost:8000"
-INFERENCE_API_KEY = "nilai-rahasia-yang-sama-dengan-di-fastpi/.env"
+API_URL = "http://usernameHF-namaspace.hf.space/infer"
+INFERENCE_API_KEY = "set up private di HuggingFace"
 
 [connections.supabase]
 dialect = "postgresql"
@@ -120,15 +133,9 @@ username = "your-username"
 password = "your-password"
 ```
 
-> ⚠️ File `secrets.toml` dan `.env` berisi kredensial rahasia — pastikan sudah masuk `.gitignore` dan **tidak pernah** di-commit ke repository.
+> ⚠️ File `secrets.toml` berisi kredensial rahasia — pastikan sudah masuk `.gitignore` dan **tidak pernah** di-commit ke repository.
 
-Jalankan Streamlit:
-
-```bash
-streamlit run app.py
-```
-
-Buka `http://localhost:8501` di browser.
+Buka di `http://localhost:8501` di browser.
 
 ---
 
@@ -144,7 +151,9 @@ Buka `http://localhost:8501` di browser.
 
 ## Deployment
 
-- **FastAPI**: di-deploy ke [Hugging Face Spaces](https://huggingface.co/spaces) menggunakan Docker
-- **Streamlit**: di-deploy ke [Streamlit Community Cloud](https://streamlit.io/cloud), dengan main file path `streamlit/src/app.py`
+- **FastAPI**: di-deploy ke [Hugging Face Spaces](https://huggingface.co/spaces/scoorpion21/fastpi) menggunakan Docker
+- **Streamlit**: di-deploy ke [Streamlit Community Cloud](https://tokopedia-sentiment-review.streamlit.app/), dengan main file path `streamlit/src/app.py`
 
-Secrets untuk masing-masing platform diisi lewat dashboard platform tersebut (Hugging Face Spaces → Settings → Secrets; Streamlit Cloud → App Settings → Secrets), bukan lewat file yang di-commit.
+Secrets untuk masing-masing platform diisi lewat dashboard platform tersebut:  
+- Hugging Face Spaces → Settings → Secrets  
+- Streamlit Cloud → App Settings → Secrets, bukan lewat file yang di-commit.

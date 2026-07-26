@@ -23,43 +23,47 @@ def run():
         "**praise** or a **complaint**."
     )
 
-    with st.spinner("Loading the language model..."):
-        _warm()
+    try:
+        with st.spinner("Loading the language model..."):
+            _warm()
 
-    pick = st.selectbox("Try an example (optional)", ["-- type my own --", *EXAMPLES.keys()])
-    default = "" if pick == "-- type my own --" else EXAMPLES[pick]
-    text = st.text_area("Customer review", value=default, height=130,
-                        placeholder="contoh: barang sampai pecah, packing asal-asalan...")
+        pick = st.selectbox("Try an example (optional)", ["-- type my own --", *EXAMPLES.keys()])
+        default = "" if pick == "-- type my own --" else EXAMPLES[pick]
+        text = st.text_area("Customer review", value=default, height=130,
+                            placeholder="contoh: barang sampai pecah, packing asal-asalan...")
 
-    if st.button("Predict theme", type="primary"):
-        if not text.strip():
-            st.warning("Please paste a review first.")
-            return
-        with st.spinner("Analyzing..."):
-            cleaned, ranked = predict_theme(text)
+        if st.button("Predict theme", type="primary"):
+            if not text.strip():
+                st.warning("Please paste a review first.")
+                return
+            with st.spinner("Analyzing..."):
+                cleaned, ranked = predict_theme(text)
 
-        if not ranked:
-            st.error("No usable text after cleaning - try a longer review.")
-            return
+            if not ranked:
+                st.error("No usable text after cleaning - try a longer review.")
+                return
 
-        side, theme, sim = ranked[0]
-        if side == "Positive":
-            st.success(f"👍 **{theme}**  -  reads as a positive review")
-        else:
-            st.error(f"👎 **{theme}**  -  reads as a negative review")
-        st.caption(f"Confidence (cosine similarity): {sim:.2f}")
+            side, theme, sim = ranked[0]
+            if side == "Positive":
+                st.success(f"👍 **{theme}**  -  reads as a positive review")
+            else:
+                st.error(f"👎 **{theme}**  -  reads as a negative review")
+            st.caption(f"Confidence (cosine similarity): {sim:.2f}")
 
-        if len(ranked) > 1:
-            st.markdown("**Other close themes:**")
-            for s, th, sm in ranked[1:]:
-                tag = "praise" if s == "Positive" else "complaint"
-                st.write(f"- {th}  *({tag}, {sm:.2f})*")
+            if len(ranked) > 1:
+                st.markdown("**Other close themes:**")
+                for s, th, sm in ranked[1:]:
+                    tag = "praise" if s == "Positive" else "complaint"
+                    st.write(f"- {th}  *({tag}, {sm:.2f})*")
 
-        with st.expander("What the model actually read (after cleaning)"):
-            st.code(cleaned or "(empty)")
+            with st.expander("What the model actually read (after cleaning)"):
+                st.code(cleaned or "(empty)")
 
-    st.caption(
-        "Themes were learned separately for positive and negative reviews; the app picks the "
-        "single closest theme across both. Mixed Indonesian-English terms (e.g. 'fast charging') "
-        "can occasionally be matched to a delivery/speed theme."
-    )
+        st.caption(
+            "Themes were learned separately for positive and negative reviews; the app picks the "
+            "single closest theme across both. Mixed Indonesian-English terms (e.g. 'fast charging') "
+            "can occasionally be matched to a delivery/speed theme."
+        )
+    except:
+        st.error('If You facing this message, the HuggingFace space is shutting down')
+    
