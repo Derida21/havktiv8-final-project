@@ -1,8 +1,6 @@
-# Topic Pulse — Topic-Based Review Analysis for Indonesian Tokopedia Reviews
+# Topic Pulse — Analisis Tema Ulasan Produk Tokopedia Berbahasa Indonesia
 
-This project uses Python and BERTopic to go beyond sentiment analysis, uncovering the actual topics behind customer praise and complaints in Indonesian Tokopedia reviews (PRDECT-ID dataset).
-
-The app lets users explore the model's methodology, browse an interactive EDA dashboard, predict the theme of any review in real time, and submit new reviews that are automatically themed on the way in.
+Proyek ini mengubah ulasan produk Tokopedia yang masih mentah menjadi informasi yang lebih terstruktur dan mudah dieksplorasi. Daripada hanya menampilkan skor sentimen positif atau negatif, setiap ulasan dikelompokkan ke dalam tema atau topik tertentu (misalnya kemasan, pengiriman cepat, penjual yang kurang responsif, atau barang yang tidak sesuai deskripsi) yang ditemukan secara otomatis menggunakan teknik topic modeling.
 
 ![App Preview](topic-pulse-logo.png)
 
